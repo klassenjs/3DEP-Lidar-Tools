@@ -1,0 +1,14 @@
+[
+    {
+        "type":"readers.las",
+        "threads": 1
+    },
+    {
+        "type":"filters.reprojection",
+        "out_srs":"EPSG:6344+5703"
+    },
+    {
+        "type":"writers.las",
+        "forward":"all"
+    }
+]
