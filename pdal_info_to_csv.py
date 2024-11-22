@@ -38,16 +38,24 @@ for root, dirs, files in os.walk(sys.argv[1]):
             try:
                 with open(os.path.join(root, filename)) as f:
                     j = json.load(f)
+
+                    if "stages" in j:
+                        # Handle `pdal pipeline` metadata format
+                        j_stats = j["stages"]["filters.stats"]
+                        j_boundary = j["stages"]["filters.hexbin"]
+                    else:
+                        # Handle `pdal info` metadata format
+                        j_stats = j["stats"]
+                        j_boundary = j["boundary"]
+
                     row = []
                     row.append(os.path.join(root,filename.replace(".json","")))
-                    #row.append(os.path.basename(j["filename"]).replace(".las",""))
-                    #row.append(j["boundary"]["boundary"])
-                    row.append(json.dumps(j["stats"]["bbox"]["EPSG:4326"]["boundary"]))
-                    row.append(j["boundary"].get("avg_pt_per_sq_unit"))
-                    row.append(j["boundary"].get("avg_pt_spacing"))
+                    row.append(json.dumps(j_stats["bbox"]["EPSG:4326"]["boundary"]))
+                    row.append(j_boundary.get("avg_pt_per_sq_unit"))
+                    row.append(j_boundary.get("avg_pt_spacing"))
 
                     for dim in dims:
-                        el = [x for x in j["stats"]["statistic"] if x["name"] == dim][0]
+                        el = [x for x in j_stats["statistic"] if x["name"] == dim][0]
                         for stat in stats:
                             val = el[stat]
                             if dim == "GpsTime" and stat != "stddev":
@@ -56,8 +64,9 @@ for root, dirs, files in os.walk(sys.argv[1]):
                                 val = time.strftime("%Y-%m-%dT%H:%M:%SZ", val)
                             row.append(val)
                     for enum in enums:
-                        el = [x for x in j["stats"]["statistic"] if x["name"] == enum][0]
+                        el = [x for x in j_stats["statistic"] if x["name"] == enum][0]
                         row.append(" ".join(map(str, el["values"])))
                     c.writerow(row)
             except Exception as e:
-                sys.stderr.write(os.path.join(root,filename) + " failed due to " + str(e) + "\n")
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                sys.stderr.write(f"{os.path.join(root,filename)} failed due to {str(e)} at line {exc_tb.tb_lineno}\n")

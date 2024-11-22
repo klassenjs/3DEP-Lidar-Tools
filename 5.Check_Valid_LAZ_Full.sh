@@ -1,45 +1,28 @@
 #!/bin/bash
 
-# Check files valid (full)
+# Check files valid (full) and generate metadata JSONs for 7.Build_Tile_Index_With_Stats.sh
 for i in `find vdelivery/Datasets/Staged/Elevation/LPC/Projects -name 0_file_download_links.txt` ; do
+   here="$(pwd)"
    dir=${i/0_file_download_links.txt/LAZ}
    outdir="$(pwd)/lasinfo"
    echo "Checking $dir"
    (
      set -eu
      cd $dir
-     mkdir -p /scratch/lasinfo/"$dir" bad
+     mkdir -p "$outdir"/"$dir" bad
      for j in *.laz ; do
         outjson="$outdir"/"$dir/$(basename $j).json"
-        tmplas="$outdir"/"$dir/$(basename $j).las"
         if [ ! -e "$outjson" ] ; then
-            sem -j+0 pdal info --all --enumerate Classification $j ">" /scratch/lasinfo/"$dir/$(basename $j).json" "2>&1" "||" echo mv -v $j bad
+            # What it normally should be:
+            #  sem -j+0 pdal info --all --enumerate Classification $j ">" "$outjson" "2>&1" "||" echo mv -v $j bad
+            #
+            # Need this because some LAZ files have malformed CRS and causes PDAL to not emit the EPSG:4326 BBOX:
+            # Note: this does slightly change the metadata output structure.
+            #
+            sem -j+0 pdal pipeline "$here"/fix_projection.json --readers.las.filename="$j" --metadata /dev/stdout ">" "$outjson" "2>&1" "||" echo mv -v $j bad
         fi
      done
      rmdir --ignore-fail-on-non-empty bad
-   )
-done
-sem --wait
-
-
-# Check files valid (and fix malformed projections causing EPSG:4326 metadata to not be generated)
-for i in `find vdelivery/Datasets/Staged/Elevation/LPC/Projects -name 0_file_download_links.txt` ; do
-   dir=${i/0_file_download_links.txt/LAZ}
-   here="$(pwd)"
-   outdir="$(pwd)/lasinfo"
-   pipeline="$(pwd)/fix_projection.json"
-   echo "Checking $dir"
-   (
-     set -eu
-     cd $dir
-     for j in *.laz ; do
-        outjson="$outdir"/"$dir/$(basename $j).json"
-        tmplas="$outdir"/"$dir/$(basename $j).las"
-        if [ ! -e "$outjson" ] ; then
-            echo $j
-            sem -j8 "$here"/fix_projection.sh "$pipeline" "$dir" "$j" "$outdir"
-        fi
-     done
    )
 done
 sem --wait
