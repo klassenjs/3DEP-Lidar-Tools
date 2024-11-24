@@ -19,7 +19,7 @@ for i in `find vdelivery/Datasets/Staged/Elevation/LPC/Projects -name 0_file_dow
             # Need this because some LAZ files have malformed CRS and causes PDAL to not emit the EPSG:4326 BBOX:
             # Note: this does slightly change the metadata output structure.
             #
-            sem -j+0 pdal pipeline "$here"/fix_projection.json --readers.las.filename="$j" --metadata /dev/stdout ">" "$outjson" "2>&1" "||" echo mv -v $j bad
+            sem -j+0 pdal pipeline "$here"/fix_projection.json --readers.las.filename="$j" --metadata /dev/stdout ">" "$outjson" "2>&1" "||" mv -v $j bad
         fi
      done
      rmdir --ignore-fail-on-non-empty bad
