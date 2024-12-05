@@ -3,6 +3,7 @@
 PROJECTS=(
 	MN_BeckerCounty_2021_D21
 	MN_CentralMissRiver_B22
+	MN_DouglasCounty_A22
 	MN_GoodhueCounty_2020_A20
 	MN_LakeCounty_2018_C20
 	MN_LakeSuperior_2021_B21
