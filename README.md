@@ -20,6 +20,6 @@ Also, [GDAL](https://gdal.org) >= 3.6 and [PDAL](https://pdal.io) >=
 2.5 are needed for reading and indexing the DEM TIFF files and LAZ
 files.
 
-As of November 2024, the total download size is approximately 33TiB,
+As of December 2024, the total download size is approximately 34TiB,
 with 1.6TiB of that being the DEMs and the rest being the LAZ point
 clouds.
