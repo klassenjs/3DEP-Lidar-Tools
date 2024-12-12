@@ -18,3 +18,7 @@ ogrinfo MN-3DEP-Index-With-Tile-Stats.gpkg -sql 'vacuum;'
 
 ## See the output:
 # ogrinfo MN-3DEP-Index-With-Tile-Stats.gpkg -sql "alter table tindex drop column boundary"
+
+if [[ -s a.err ]] ; then
+  echo "Warning: there were errors processing some tiles, check a.err"
+fi
