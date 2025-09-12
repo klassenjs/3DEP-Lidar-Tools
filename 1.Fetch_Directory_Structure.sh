@@ -9,6 +9,7 @@ PROJECTS=(
 	MN_LakeSuperior_2021_B21
 	MN_MissouriRiverBigSioux_2021_B21
 	MN_RainyLake_2020_B20
+	MN_RedRiver_D23
 	MN_RiverEast_B23
 	MN_RiverWest_B23
 	MN_SE_Driftless_2021_B21
