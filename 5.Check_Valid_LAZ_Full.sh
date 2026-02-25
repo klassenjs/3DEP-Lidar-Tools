@@ -8,6 +8,19 @@ for i in `find vdelivery/Datasets/Staged/Elevation/LPC/Projects/"$1" -name 0_fil
    dir="${i/0_file_download_links.txt/LAZ}"
    outdir="$(pwd)/lasinfo"
    echo "Checking $dir"
+
+   # MN_RedRiver_3_D23 and MN_RedRiver_4_D23 have correct UTM15 EPSG codes and CRS names, but the values
+   # for longitude, etc. in the WKT are for UTM14.  PDAL prioritizes the contents of the WKT over the names.
+   # This forces the projection to be correct for these two collects.
+   fix_projection="$here/fix_projection.json"
+   if [ $dir == "vdelivery/Datasets/Staged/Elevation/LPC/Projects/MN_RedRiver_D23/MN_RedRiver_3_D23/LAZ" ] ; then
+     echo "Forcing projection to UTM15"
+     fix_projection="$here/fix_projection2.json"
+   fi
+   if [ $dir == "vdelivery/Datasets/Staged/Elevation/LPC/Projects/MN_RedRiver_D23/MN_RedRiver_4_D23/LAZ" ] ; then
+     echo "Forcing projection to UTM15"
+     fix_projection="$here/fix_projection2.json"
+   fi
    (
      set -eu
      cd $dir
@@ -21,7 +34,7 @@ for i in `find vdelivery/Datasets/Staged/Elevation/LPC/Projects/"$1" -name 0_fil
             # Need this because some LAZ files have malformed CRS and causes PDAL to not emit the EPSG:4326 BBOX:
             # Note: this does slightly change the metadata output structure.
             #
-            sem -j+0 pdal pipeline "$here"/fix_projection.json --readers.las.filename="$j" --metadata /dev/stdout ">" "$outjson" "2>&1" "||" mv -v "$j" bad
+            sem -j+0 pdal pipeline "$fix_projection" --readers.las.filename="$j" --metadata /dev/stdout ">" "$outjson" "2>&1" "||" mv -v "$j" bad
         fi
      done
      rmdir --ignore-fail-on-non-empty bad
